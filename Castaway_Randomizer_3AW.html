@@ -424,7 +424,7 @@ function skipIntro(){clearTimers();swiped=true;phase='reveal';setMood('day');sce
 /* ===================== REVEAL ===================== */
 let camps=[],revealIdx=-1;
 function showReveal(){phase='reveal';stage.innerHTML='';scene.style.transform='';stage.style.transform='';scene.style.filter='';document.getElementById('skip-btn').classList.remove('on');setMood('day');camps=assignCamps();revealIdx=-1;renderReveal()}
-function revealNext(){if(revealIdx<camps.length-1){revealIdx++;const last=revealIdx>=camps.length-1;conch(revealIdx);if(last){setTimeout(()=>{finaleSound();celebrate()},420);setTimeout(openMission,1300)}renderReveal()}}
+function revealNext(){if(revealIdx<camps.length-1){revealIdx++;const last=revealIdx>=camps.length-1;conch(revealIdx);if(last){setTimeout(()=>{finaleSound();celebrate()},420)}renderReveal()}}
 function renderReveal(){
   const head=revealIdx<camps.length-1?'Tap to bring each camp ashore…':'All camps ashore. Time to choose what you keep.';
   const cards=camps.map((g,i)=>{
