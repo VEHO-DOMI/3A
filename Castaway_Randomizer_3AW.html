@@ -102,8 +102,8 @@ body{font-family:'DM Sans',sans-serif;color:var(--deep);overflow-x:hidden;backgr
 /* reveal — camps */
 .reveal-head{font-family:'Playfair Display',serif;font-size:30px;letter-spacing:4px;color:var(--cream);text-shadow:0 2px 12px rgba(0,0,0,.5);margin-bottom:6px}
 .reveal-sub{font-family:'Caveat',cursive;font-size:21px;color:var(--cream);margin-bottom:24px;text-shadow:0 1px 6px rgba(0,0,0,.45)}
-.camp-grid{display:grid;gap:18px;max-width:1000px;width:100%;margin:0 auto 26px}
-.camp{position:relative;border-radius:14px;padding:16px 14px 18px;min-height:208px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;cursor:pointer;transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
+.camp-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:18px;max-width:1000px;width:100%;margin:0 auto 26px}
+.camp{position:relative;flex:0 0 320px;max-width:90vw;border-radius:14px;padding:16px 14px 18px;min-height:208px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;cursor:pointer;transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
 .camp.hidden{background:linear-gradient(170deg,rgba(10,58,64,.62),rgba(10,58,64,.42));border:2px dashed rgba(244,232,208,.5);align-items:center;justify-content:center;backdrop-filter:blur(3px)}
 .camp.hidden .q{font-size:44px}
 .camp.hidden .htext{font-family:'Caveat',cursive;font-size:20px;color:var(--sand);margin-top:4px}
@@ -305,9 +305,6 @@ function revealNext(){
   }
 }
 function renderReveal(){
-  const n=camps.length, cols=Math.min(3,Math.max(1,Math.ceil(Math.sqrt(n))));
-  const orphan=(n%cols!==0)&&(n>cols)?(Math.floor((cols-(n%cols))/2)+1):0;
-  const orphanCSS=orphan?`<style>.camp-grid .camp:nth-child(${n}){grid-column:${orphan}}</style>`:'';
   const cards=camps.map((g,i)=>{
     const shown=i<=revealIdx,isNext=i===revealIdx+1,justNow=i===revealIdx;
     if(shown){
@@ -321,8 +318,8 @@ function renderReveal(){
     ?`<button class="btn btn-gold" onclick="revealNext()">Land at ${camps[revealIdx+1].name} →</button>`
     :`<button class="btn btn-gold" onclick="openMission()">📜 Your Mission</button><button class="btn btn-wood" onclick="startStory()">↻ New storm</button>`;
   const head=revealIdx<camps.length-1?'Tap to bring each camp ashore…':'All camps ashore. Time to choose what you keep.';
-  center.innerHTML=`${orphanCSS}<div class="reveal-head">Your Survival Camps</div><div class="reveal-sub">${head}</div>
-    <div class="camp-grid" style="grid-template-columns:repeat(${cols},minmax(0,1fr))">${cards}</div>
+  center.innerHTML=`<div class="reveal-head">Your Survival Camps</div><div class="reveal-sub">${head}</div>
+    <div class="camp-grid">${cards}</div>
     <div class="btn-row">${btn}</div>`;
 }
 
