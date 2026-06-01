@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Castaway Choices — Group Randomizer</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--space:#04141A;--void:#0A2A33;--gold:#EFB94E;--gold-dim:#B5862F;--cream:#F4E8D0;--star:#FFFFFF;--muted:#8FA8A0;--deep:#0E2530;--coral:#F2784B;--danger:#E84545;--ok:#52B788}
+body{background:var(--space);min-height:100vh;font-family:'DM Sans',sans-serif;overflow-x:hidden;position:relative;color:var(--cream)}
+body::before,body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0}
+body::before{background-image:radial-gradient(1.5px 1.5px at 20px 30px,#fff,transparent),radial-gradient(1.5px 1.5px at 90px 110px,rgba(255,255,255,.8),transparent),radial-gradient(1px 1px at 160px 60px,#fff,transparent),radial-gradient(2px 2px at 240px 180px,rgba(255,255,255,.9),transparent),radial-gradient(1px 1px at 50px 200px,#fff,transparent),radial-gradient(1.5px 1.5px at 320px 100px,rgba(255,255,255,.7),transparent);background-size:380px 380px;opacity:.7}
+body::after{background-image:radial-gradient(1px 1px at 70px 50px,#fff,transparent),radial-gradient(1.5px 1.5px at 200px 220px,rgba(255,255,255,.6),transparent),radial-gradient(1px 1px at 280px 80px,rgba(255,255,255,.8),transparent),radial-gradient(2px 2px at 130px 280px,#fff,transparent);background-size:520px 520px;opacity:.5}
+
+#app{position:relative;z-index:1;min-height:100vh}
+
+/* ============ HEADER ============ */
+.header{background:linear-gradient(180deg,#04141A,#0A2A33);border-bottom:1px solid rgba(239,185,78,.4);padding:28px 32px 22px;position:relative;z-index:2}
+.header::before{content:'';position:absolute;left:32px;right:32px;bottom:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.header-row{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.header h1{font-family:'Playfair Display',serif;font-size:36px;color:var(--gold);letter-spacing:6px;font-weight:700;cursor:pointer}
+.header p{font-family:'Playfair Display',serif;font-style:italic;font-size:16px;color:var(--cream);margin-top:6px;letter-spacing:1px;opacity:.85}
+.header-actions{display:flex;gap:10px;align-items:center}
+.crumb{font-family:'Space Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:3px;text-transform:uppercase;opacity:.7;cursor:pointer}
+.crumb:hover{opacity:1}
+
+/* ============ BUTTONS ============ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 22px;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;letter-spacing:2px;cursor:pointer;border:none;border-radius:6px;transition:all .2s;text-transform:uppercase}
+.btn-primary{background:linear-gradient(135deg,#EFB94E,#B5862F);color:#04141A;box-shadow:0 0 18px rgba(239,185,78,.3)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 0 28px rgba(239,185,78,.5)}
+.btn-secondary{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+.btn-secondary:hover{background:rgba(239,185,78,.1)}
+.btn-ghost{background:transparent;color:var(--cream);border:1px solid rgba(239,185,78,.25)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid rgba(232,69,69,.4)}
+.btn-danger:hover{background:rgba(232,69,69,.1);border-color:var(--danger)}
+.btn-sm{padding:8px 14px;font-size:12px;letter-spacing:1.5px}
+.btn-block{display:flex;width:100%}
+
+/* ============ HOME PAGE ============ */
+.home{max-width:1000px;margin:0 auto;padding:48px 28px}
+.home h2{font-family:'Playfair Display',serif;font-size:28px;color:var(--cream);letter-spacing:3px;margin-bottom:6px}
+.home .lead{color:var(--muted);font-size:14px;margin-bottom:32px;font-style:italic}
+.class-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;margin-bottom:32px}
+.class-card{background:linear-gradient(160deg,var(--deep),var(--void));border:1px solid rgba(239,185,78,.25);border-radius:12px;padding:24px;cursor:pointer;transition:all .25s;position:relative;display:flex;flex-direction:column;min-height:180px}
+.class-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 8px 28px rgba(239,185,78,.18)}
+.class-card .class-name{font-family:'Playfair Display',serif;font-size:24px;color:var(--gold);letter-spacing:3px;font-weight:700;margin-bottom:6px}
+.class-card .class-meta{color:var(--muted);font-size:12px;letter-spacing:1.5px;font-family:'Space Mono',monospace;margin-bottom:14px;text-transform:uppercase}
+.class-card .class-students{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto;margin-bottom:16px;max-height:64px;overflow:hidden}
+.class-card .mini-photo{width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid var(--gold-dim)}
+.class-card .mini-more{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);align-self:center;padding-left:6px}
+.class-card .card-actions{display:flex;gap:8px;margin-top:auto}
+.class-card .card-actions .btn{flex:1}
+.class-card.empty-card{border-style:dashed;align-items:center;justify-content:center;text-align:center;color:var(--gold);min-height:180px;font-family:'Playfair Display',serif}
+.class-card.empty-card .big{font-size:36px;margin-bottom:8px}
+.class-card.empty-card .label{font-size:13px;letter-spacing:2px;color:var(--cream)}
+.home-toolbar{display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.home-empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.home-empty .big{font-family:'Playfair Display',serif;font-size:48px;color:var(--gold);opacity:.6;margin-bottom:14px}
+
+/* ============ EDITOR PAGE ============ */
+.editor{max-width:880px;margin:0 auto;padding:36px 28px}
+.editor h2{font-family:'Playfair Display',serif;font-size:24px;color:var(--cream);letter-spacing:3px;margin-bottom:24px}
+.section{background:linear-gradient(160deg,rgba(14,37,48,.6),rgba(10,42,51,.6));border:1px solid rgba(239,185,78,.2);border-radius:10px;padding:22px 24px;margin-bottom:20px}
+.section h3{font-family:'Playfair Display',serif;font-size:14px;color:var(--gold);letter-spacing:3px;margin-bottom:14px;text-transform:uppercase}
+.field{margin-bottom:16px}
+.field label{display:block;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.field input[type=text],.field input[type=number]{width:100%;background:var(--void);color:var(--cream);border:1px solid rgba(239,185,78,.25);border-radius:6px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:15px;transition:border-color .15s}
+.field input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(239,185,78,.15)}
+.field-row{display:flex;gap:12px;flex-wrap:wrap}
+.field-row .field{flex:1;min-width:140px}
+.help{font-size:12px;color:var(--muted);margin-top:4px;font-style:italic}
+
+/* Group sizes preview */
+.sizes-preview{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.size-chip{font-family:'Space Mono',monospace;font-size:12px;color:var(--gold);background:rgba(239,185,78,.1);border:1px solid rgba(239,185,78,.35);padding:4px 10px;border-radius:4px;letter-spacing:1px}
+.sizes-warn{color:var(--danger);font-size:12px;margin-top:8px;font-style:italic}
+
+/* Drop zone */
+.dropzone{border:2px dashed rgba(239,185,78,.35);border-radius:10px;padding:30px 20px;text-align:center;transition:all .2s;cursor:pointer;background:rgba(239,185,78,.03)}
+.dropzone:hover,.dropzone.dragover{border-color:var(--gold);background:rgba(239,185,78,.08)}
+.dropzone .big{font-family:'Playfair Display',serif;font-size:18px;color:var(--gold);margin-bottom:6px;letter-spacing:2px}
+.dropzone .small{color:var(--muted);font-size:12px;font-style:italic}
+.dropzone input[type=file]{display:none}
+
+/* Student grid in editor */
+.students-bar{display:flex;align-items:center;justify-content:space-between;margin:18px 0 12px;gap:12px;flex-wrap:wrap}
+.students-bar .count{font-family:'Space Mono',monospace;font-size:13px;color:var(--gold);letter-spacing:2px}
+.student-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.student-tile{display:flex;align-items:center;gap:10px;background:var(--void);border:1px solid rgba(239,185,78,.18);border-radius:8px;padding:8px 10px;position:relative}
+.student-tile img{width:38px;height:38px;border-radius:50%;object-fit:cover;border:1px solid var(--gold-dim);flex-shrink:0}
+.student-tile input.name{flex:1;min-width:0;background:transparent;color:var(--cream);border:none;font-size:14px;font-family:'DM Sans',sans-serif;padding:4px 0}
+.student-tile input.name:focus{outline:none;border-bottom:1px solid var(--gold)}
+.student-tile .del{background:transparent;color:var(--muted);border:none;cursor:pointer;font-size:14px;padding:4px;transition:color .15s}
+.student-tile .del:hover{color:var(--danger)}
+
+.editor-actions{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;margin-top:24px}
+.editor-actions .left,.editor-actions .right{display:flex;gap:10px}
+
+/* Toast */
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--deep);border:1px solid var(--gold);border-radius:6px;padding:14px 22px;font-family:'Space Mono',monospace;font-size:13px;color:var(--gold);letter-spacing:1.5px;z-index:1000;box-shadow:0 0 24px rgba(239,185,78,.3);animation:toastIn .25s ease;text-transform:uppercase}
+.toast.danger{border-color:var(--danger);color:var(--danger);box-shadow:0 0 24px rgba(232,69,69,.3)}
+@keyframes toastIn{from{transform:translate(-50%,30px);opacity:0}to{transform:translateX(-50%);opacity:1}}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(4,20,26,.85);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .15s ease}
+.modal{background:var(--deep);border:1px solid var(--gold);border-radius:10px;padding:28px;max-width:420px;width:100%;text-align:center}
+.modal h3{font-family:'Playfair Display',serif;color:var(--gold);font-size:20px;letter-spacing:2px;margin-bottom:8px}
+.modal p{color:var(--cream);font-size:14px;margin-bottom:22px}
+.modal .actions{display:flex;gap:10px;justify-content:center}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ============ RANDOMIZER (CASTAWAY) ============ */
+.landing{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;min-height:70vh;position:relative;z-index:1}
+.landing-faces{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:700px;margin-bottom:48px}
+.landing-face{width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid var(--gold-dim);opacity:0;transform:scale(0.5);animation:popIn .4s ease forwards;box-shadow:0 0 12px rgba(239,185,78,.2)}
+@keyframes popIn{to{opacity:1;transform:scale(1)}}
+.start-btn{background:linear-gradient(135deg,#EFB94E,#B5862F);color:#04141A;border:none;padding:18px 48px;font-family:'Playfair Display',serif;font-size:22px;font-weight:700;letter-spacing:3px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;border-radius:6px;box-shadow:0 0 28px rgba(239,185,78,.35)}
+.start-btn:hover{transform:scale(1.04);box-shadow:0 0 40px rgba(239,185,78,.55)}
+.start-btn::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);animation:shimmer 2s infinite}
+@keyframes shimmer{to{left:100%}}
+
+.shuffle-area{position:relative;min-height:calc(100vh - 110px);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1}
+.warp-canvas{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.streak{position:absolute;left:50%;top:50%;width:2px;height:0;background:linear-gradient(to bottom,transparent 0%,rgba(239,185,78,0.15) 30%,var(--gold) 80%,#fff 100%);transform-origin:top center;transform:translate(-50%,0) rotate(var(--a));animation:streak 1.5s cubic-bezier(.4,0,.7,1) var(--d) infinite;opacity:0;filter:drop-shadow(0 0 4px var(--gold))}
+@keyframes streak{0%{height:0;opacity:0;transform:translate(-50%,30vh) rotate(var(--a))}15%{opacity:1}100%{height:120vh;opacity:0;transform:translate(-50%,0) rotate(var(--a))}}
+.radar{position:absolute;left:50%;top:50%;width:80px;height:80px;margin:-40px;border:2px solid var(--gold);border-radius:50%;animation:radar 2.8s ease-out infinite;opacity:0;pointer-events:none;box-shadow:0 0 30px rgba(239,185,78,.4),inset 0 0 20px rgba(239,185,78,.2)}
+.radar.r2{animation-delay:.93s;border-color:rgba(239,185,78,.7)}
+.radar.r3{animation-delay:1.87s;border-color:rgba(239,185,78,.5)}
+@keyframes radar{0%{transform:scale(0.15);opacity:.95}60%{opacity:.5}100%{transform:scale(9);opacity:0}}
+.hub{position:relative;z-index:5;width:320px;height:320px;display:flex;align-items:center;justify-content:center}
+.hub-disc{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px;border-radius:50%;border:3px solid var(--gold);background:radial-gradient(circle at 35% 30%,rgba(244,232,208,.18),rgba(10,42,51,.55) 55%,rgba(4,20,26,.92));box-shadow:0 0 50px rgba(239,185,78,.5),0 0 100px rgba(239,185,78,.22),inset 0 0 28px rgba(0,0,0,.5)}
+.hub-disc::before{content:'';position:absolute;inset:-3px;border-radius:50%;background:repeating-conic-gradient(from 0deg,var(--gold) 0 1.4deg,transparent 1.4deg 45deg);-webkit-mask:radial-gradient(transparent 58%,#000 60%);mask:radial-gradient(transparent 58%,#000 60%);opacity:.55}
+.hub-disc::after{content:'';position:absolute;left:50%;top:50%;width:9px;height:9px;margin:-4.5px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);z-index:3}
+.compass-needle{position:absolute;left:50%;top:50%;width:10px;height:120px;margin:-60px -5px;z-index:2;animation:hubspin 4s linear infinite;filter:drop-shadow(0 0 5px rgba(239,185,78,.55))}
+.compass-needle::before{content:'';position:absolute;top:0;left:0;width:10px;height:60px;background:linear-gradient(var(--coral),#8a3522);clip-path:polygon(50% 0,100% 100%,0 100%)}
+.compass-needle::after{content:'';position:absolute;bottom:0;left:0;width:10px;height:60px;background:linear-gradient(#d8c089,var(--gold));clip-path:polygon(0 0,100% 0,50% 100%)}
+@keyframes hubspin{to{transform:rotate(360deg)}}
+.orbit-zone{position:absolute;inset:0;animation:orbitspin 12s linear infinite}
+.orbit-photo{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px;border-radius:50%;overflow:hidden;border:2px solid var(--gold);box-shadow:0 0 18px rgba(239,185,78,.6);transform:rotate(var(--start)) translateX(135px) rotate(calc(-1 * var(--start)));transition:none}
+.orbit-photo img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .25s}
+@keyframes orbitspin{to{transform:rotate(360deg)}}
+.transmission-text{position:relative;z-index:5;margin-top:56px;font-family:'Playfair Display',serif;font-size:28px;color:var(--gold);letter-spacing:8px;text-shadow:0 0 20px rgba(239,185,78,.6);animation:textpulse 1.2s ease-in-out infinite alternate}
+@keyframes textpulse{from{opacity:.6;text-shadow:0 0 8px rgba(239,185,78,.4)}to{opacity:1;text-shadow:0 0 24px rgba(239,185,78,.8)}}
+.transmission-data{position:relative;z-index:5;margin-top:14px;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:3px;text-transform:uppercase}
+.transmission-data .v{color:var(--gold);font-weight:700}
+.transmission-data .dot{display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--gold);margin:0 10px;vertical-align:middle;opacity:.6}
+.coord-readout{position:absolute;font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);opacity:.5;letter-spacing:2px;z-index:5;pointer-events:none}
+.coord-readout.tl{top:24px;left:24px}
+.coord-readout.tr{top:24px;right:24px;text-align:right}
+.coord-readout.bl{bottom:24px;left:24px}
+.coord-readout.br{bottom:24px;right:24px;text-align:right}
+.code-stream{position:absolute;top:14px;bottom:14px;width:215px;overflow:hidden;font-family:'Space Mono',monospace;font-size:10.5px;color:rgba(239,185,78,.55);z-index:4;pointer-events:none;letter-spacing:.5px;display:flex;flex-direction:column;justify-content:flex-end;line-height:1.55;-webkit-mask-image:linear-gradient(to bottom,transparent 0%,black 8%,black 92%,transparent 100%);mask-image:linear-gradient(to bottom,transparent 0%,black 8%,black 92%,transparent 100%)}
+.code-stream.left{left:24px;text-align:left}
+.code-stream.right{right:24px;text-align:right}
+.code-line{opacity:0;white-space:nowrap;animation:codeIn .25s ease forwards;text-shadow:0 0 6px rgba(239,185,78,.3);flex:0 0 auto}
+@keyframes codeIn{0%{opacity:0;transform:translateY(4px)}100%{opacity:.7;transform:translateY(0)}}
+
+.reveal-area{padding:32px 16px 40px;background:transparent;min-height:calc(100vh - 100px);position:relative;z-index:1}
+.reveal-grid{display:grid;gap:18px;max-width:900px;margin:0 auto 28px}
+.group-card{border-radius:14px;padding:22px 14px 18px;text-align:center;min-height:210px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .5s cubic-bezier(.34,1.56,.64,1);position:relative}
+.group-card.hidden{background:var(--void);border:1px solid rgba(239,185,78,.25);transform:scale(.96)}
+.group-card.hidden:hover{border-color:var(--gold);transform:scale(.99);box-shadow:0 0 18px rgba(239,185,78,.15)}
+.group-card.next{border-color:var(--gold)!important;box-shadow:0 0 24px rgba(239,185,78,.35)}
+.group-card.revealed{background:linear-gradient(160deg,var(--deep),var(--void));border:1px solid var(--gold);box-shadow:0 0 28px rgba(239,185,78,.18);transform:scale(1);animation:flipIn .6s ease}
+@keyframes flipIn{0%{transform:rotateY(90deg) scale(.8);opacity:0}50%{transform:rotateY(-5deg) scale(1.02)}100%{transform:rotateY(0) scale(1);opacity:1}}
+.reveal-pulse{position:absolute;inset:-4px;border:1px solid var(--gold);border-radius:16px;animation:revealPulse .8s ease-out forwards;pointer-events:none;z-index:1}
+@keyframes revealPulse{0%{transform:scale(1);opacity:.65;box-shadow:0 0 20px 5px rgba(239,185,78,.35)}100%{transform:scale(1.14);opacity:0;box-shadow:0 0 40px 12px rgba(239,185,78,0)}}
+.reveal-sparks{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none;z-index:2}
+.spark{position:absolute;left:-2.5px;top:-2.5px;width:5px;height:5px;background:var(--gold);border-radius:50%;box-shadow:0 0 8px var(--gold),0 0 2px #fff;transform-origin:2.5px 2.5px;animation:sparkOut .75s cubic-bezier(.16,.84,.44,1) forwards;opacity:0}
+@keyframes sparkOut{0%{transform:rotate(var(--a)) translateX(0) scale(0);opacity:0}30%{opacity:.85;transform:rotate(var(--a)) translateX(22px) scale(1)}100%{transform:rotate(var(--a)) translateX(115px) scale(.2);opacity:0}}
+.hidden-q{font-family:'Playfair Display',serif;font-size:48px;font-weight:700;color:var(--gold)}
+.hidden-label{font-size:12px;color:var(--muted);margin-top:4px;letter-spacing:2px;text-transform:uppercase}
+.tap-hint{font-size:11px;color:var(--gold);font-style:italic;margin-top:10px;animation:textpulse 1s infinite alternate}
+.transmission-label{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--gold);letter-spacing:3px;margin-bottom:16px;text-transform:uppercase}
+.member-row{display:flex;align-items:center;gap:10px;margin:5px 0}
+.member-photo{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--gold-dim);opacity:0;transform:scale(0) rotate(-20deg);animation:memberPop .4s ease forwards;transition:border-color .2s}
+.member-photo:hover{border-color:var(--gold)}
+.member-name{font-size:14px;font-weight:600;color:var(--cream)}
+.group-num{position:absolute;top:10px;right:12px;font-size:10px;color:var(--gold-dim);font-weight:700;text-transform:uppercase;letter-spacing:1px}
+@keyframes memberPop{to{opacity:1;transform:scale(1) rotate(0)}}
+.btn-row{max-width:900px;margin:0 auto;display:flex;gap:12px;flex-wrap:wrap}
+.reveal-btn{flex:1;padding:16px 0;background:linear-gradient(135deg,#EFB94E,#B5862F);color:#04141A;border:none;border-radius:8px;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s;min-width:160px}
+.reveal-btn:hover{transform:translateY(-2px);box-shadow:0 0 22px rgba(239,185,78,.35)}
+.reveal-btn.secondary{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+.reveal-btn.secondary:hover{background:rgba(239,185,78,.1);transform:translateY(-2px)}
+.all-done{text-align:center;padding:20px}
+.all-done h2{font-family:'Playfair Display',serif;color:var(--gold);font-size:24px;margin-bottom:8px;letter-spacing:2px}
+.all-done p{color:var(--muted);font-size:14px;font-style:italic}
+
+/* Sound toggle */
+.sound-toggle{position:fixed;bottom:18px;right:18px;z-index:1500;background:rgba(10,42,51,0.85);border:1px solid rgba(239,185,78,0.3);border-radius:22px;padding:9px 16px;color:var(--gold);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;cursor:pointer;backdrop-filter:blur(8px);transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.sound-toggle:hover{background:rgba(239,185,78,0.12);border-color:var(--gold);transform:translateY(-2px)}
+.sound-toggle.muted{opacity:.55;color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+'use strict';
+
+// ============ STORAGE LAYER ============
+const STORAGE_KEY = 'castaway.v1';
+const FALLBACK = { classes: {} };
+
+function loadDB() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { ...FALLBACK };
+    const parsed = JSON.parse(raw);
+    return { classes: parsed.classes || {} };
+  } catch (e) {
+    console.error("Failed to load DB:", e);
+    return { ...FALLBACK };
+  }
+}
+
+function saveDB(db) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+    return true;
+  } catch (e) {
+    toast("Out of browser storage. Export some classes to JSON and delete to free space.", "danger");
+    return false;
+  }
+}
+
+let DB = loadDB();
+
+// ============ UTILS ============
+function uid() { return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4); }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]); }
+function pad2(n) { return String(n).padStart(2,'0'); }
+
+function calcSizes(n, targetSize) {
+  if (n <= 0 || targetSize <= 0) return [];
+  const numGroups = Math.max(1, Math.round(n / targetSize));
+  const base = Math.floor(n / numGroups);
+  const extras = n - base * numGroups;
+  return Array.from({ length: numGroups }, (_, i) => base + (i < extras ? 1 : 0));
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function assignGroups(students, sizes) {
+  const s = shuffle(students);
+  const groups = [];
+  let idx = 0;
+  for (let i = 0; i < sizes.length; i++) {
+    groups.push({ idx: i + 1, members: s.slice(idx, idx + sizes[i]) });
+    idx += sizes[i];
+  }
+  return groups;
+}
+
+function deriveName(filename) {
+  return filename
+    .replace(/\.[^.]+$/, '')
+    .replace(/[_\-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// Resize/crop an image File to 200×200 PNG base64.
+function processPhoto(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const SIZE = 200;
+      const canvas = document.createElement('canvas');
+      canvas.width = SIZE;
+      canvas.height = SIZE;
+      const ctx = canvas.getContext('2d');
+      // cover-style square crop
+      const ratio = Math.max(SIZE / img.width, SIZE / img.height);
+      const w = img.width * ratio;
+      const h = img.height * ratio;
+      const x = (SIZE - w) / 2;
+      const y = (SIZE - h) / 2;
+      ctx.drawImage(img, x, y, w, h);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
+    img.src = url;
+  });
+}
+
+// ============ TOAST + MODAL ============
+let toastTimer = null;
+function toast(msg, kind = 'ok') {
+  const el = document.createElement('div');
+  el.className = 'toast' + (kind === 'danger' ? ' danger' : '');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.remove(), 3500);
+}
+
+function confirmModal(title, body, confirmLabel = 'Confirm') {
+  return new Promise(resolve => {
+    const bg = document.createElement('div');
+    bg.className = 'modal-bg';
+    bg.innerHTML = `<div class="modal">
+      <h3>${esc(title)}</h3>
+      <p>${esc(body)}</p>
+      <div class="actions">
+        <button class="btn btn-ghost" id="m-cancel">Cancel</button>
+        <button class="btn btn-danger" id="m-ok">${esc(confirmLabel)}</button>
+      </div>
+    </div>`;
+    document.body.appendChild(bg);
+    bg.querySelector('#m-cancel').onclick = () => { bg.remove(); resolve(false); };
+    bg.querySelector('#m-ok').onclick = () => { bg.remove(); resolve(true); };
+  });
+}
+
+// ============ ROUTER ============
+function navigate(hash) { location.hash = hash; }
+
+function route() {
+  const hash = location.hash || '#/';
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  if (hash === '#/' || hash === '') return renderHome();
+  const editMatch = hash.match(/^#\/edit\/(.+)$/);
+  if (editMatch) return renderEditor(editMatch[1]);
+  const runMatch = hash.match(/^#\/run\/(.+)$/);
+  if (runMatch) return renderRunner(runMatch[1]);
+  navigate('#/');
+}
+
+// ============ HEADER ============
+function renderHeader(opts = {}) {
+  const { crumb = '', backHash = '#/' } = opts;
+  return `<div class="header"><div class="header-row">
+    <div>
+      <h1 onclick="navigate('#/')">CASTAWAY CHOICES</h1>
+      ${crumb ? `<p class="crumb" onclick="navigate('${esc(backHash)}')">← ${esc(crumb)}</p>` : `<p>Class shuffler · Desert Island</p>`}
+    </div>
+  </div></div>`;
+}
+
+// ============ HOME ============
+function renderHome() {
+  const classes = Object.values(DB.classes).sort((a,b) => (a.name || '').localeCompare(b.name || ''));
+  const app = document.getElementById('app');
+  app.innerHTML = `${renderHeader()}
+    <div class="home">
+      <h2>YOUR CLASSES</h2>
+      <p class="lead">${classes.length === 0 ? 'No classes yet. Create one to get started.' : `${classes.length} class${classes.length === 1 ? '' : 'es'} saved on this device.`}</p>
+      <div class="class-grid">
+        ${classes.map(c => renderClassCard(c)).join('')}
+        <div class="class-card empty-card" onclick="newClass()">
+          <div class="big">+</div>
+          <div class="label">NEW CLASS</div>
+        </div>
+      </div>
+      <div class="home-toolbar">
+        <input type="file" id="json-import" accept="application/json,.json" style="display:none">
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('json-import').click()">⤓ Import JSON</button>
+        ${classes.length > 0 ? `<button class="btn btn-ghost btn-sm" onclick="exportAll()">⤒ Export all</button>` : ''}
+      </div>
+    </div>`;
+  document.getElementById('json-import').addEventListener('change', handleJsonImport);
+}
+
+function renderClassCard(c) {
+  const photos = (c.students || []).slice(0, 7);
+  const remaining = Math.max(0, (c.students || []).length - 7);
+  const sizesText = (c.groupSizes || []).join('+') || '—';
+  return `<div class="class-card">
+    <div class="class-name" onclick="navigate('#/run/${esc(c.id)}')">${esc(c.name || 'Untitled')}</div>
+    <div class="class-meta">${(c.students || []).length} students · groups ${sizesText}</div>
+    <div class="class-students">
+      ${photos.map(s => `<img class="mini-photo" src="${esc(s.photo)}" alt="">`).join('')}
+      ${remaining > 0 ? `<span class="mini-more">+${remaining}</span>` : ''}
+    </div>
+    <div class="card-actions">
+      <button class="btn btn-primary btn-sm" onclick="navigate('#/run/${esc(c.id)}')">▶ Run</button>
+      <button class="btn btn-secondary btn-sm" onclick="navigate('#/edit/${esc(c.id)}')">✎ Edit</button>
+    </div>
+  </div>`;
+}
+
+function newClass() {
+  const id = uid();
+  DB.classes[id] = {
+    id, name: '3A', students: [], targetGroupSize: 3,
+    groupSizes: [], headerTitle: 'CASTAWAY CHOICES', headerSubtitle: 'Desert Island',
+    groupLabel: 'Camp', createdAt: Date.now()
+  };
+  saveDB(DB);
+  navigate('#/edit/' + id);
+}
+
+// ============ EDITOR ============
+function renderEditor(id) {
+  const c = DB.classes[id];
+  if (!c) { toast('Class not found', 'danger'); navigate('#/'); return; }
+
+  const app = document.getElementById('app');
+  app.innerHTML = `${renderHeader({ crumb: 'BACK TO CLASSES', backHash: '#/' })}
+    <div class="editor">
+      <h2>EDIT CLASS</h2>
+
+      <div class="section">
+        <h3>Class details</h3>
+        <div class="field">
+          <label>Class name</label>
+          <input type="text" id="f-name" value="${esc(c.name)}" placeholder="e.g. 3A">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Header title</label>
+            <input type="text" id="f-title" value="${esc(c.headerTitle)}" placeholder="CASTAWAY CHOICES">
+            <div class="help">Shown big at the top of the randomizer.</div>
+          </div>
+          <div class="field">
+            <label>Header subtitle</label>
+            <input type="text" id="f-subtitle" value="${esc(c.headerSubtitle)}" placeholder="Desert Island">
+          </div>
+        </div>
+        <div class="field">
+          <label>Group label prefix</label>
+          <input type="text" id="f-grouplabel" value="${esc(c.groupLabel)}" placeholder="Camp">
+          <div class="help">Each group is labelled "${esc(c.groupLabel)} 01", "${esc(c.groupLabel)} 02"…</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Group sizes</h3>
+        <div class="field">
+          <label>Target group size</label>
+          <input type="number" id="f-target" value="${c.targetGroupSize}" min="2" max="20" style="max-width:120px">
+          <div class="help">Sizes are calculated automatically from this and the student count.</div>
+        </div>
+        <div id="sizes-preview"></div>
+      </div>
+
+      <div class="section">
+        <h3>Students <span class="count" id="student-count"></span></h3>
+        <div class="dropzone" id="dropzone">
+          <input type="file" id="photo-input" accept="image/*" multiple>
+          <div class="big">DROP STUDENT PHOTOS HERE</div>
+          <div class="small">or click to choose files · filename becomes the student name (rename below)</div>
+        </div>
+        <div class="students-bar">
+          <span class="count" id="student-count2"></span>
+          <button class="btn btn-ghost btn-sm" onclick="sortStudents()">↕ Sort A→Z</button>
+        </div>
+        <div class="student-grid" id="student-grid"></div>
+      </div>
+
+      <div class="editor-actions">
+        <div class="left">
+          <button class="btn btn-ghost" onclick="exportClass('${esc(id)}')">⤒ Export JSON</button>
+          <button class="btn btn-danger" onclick="deleteClass('${esc(id)}')">Delete class</button>
+        </div>
+        <div class="right">
+          <button class="btn btn-ghost" onclick="navigate('#/')">Cancel</button>
+          <button class="btn btn-primary" onclick="saveClass('${esc(id)}', true)">Save & Run ▶</button>
+          <button class="btn btn-secondary" onclick="saveClass('${esc(id)}', false)">Save</button>
+        </div>
+      </div>
+    </div>`;
+
+  // Bind input listeners that update preview without forcing save
+  const updatePreview = () => updateSizesPreview(id);
+  ['f-target'].forEach(fid => document.getElementById(fid).addEventListener('input', updatePreview));
+  document.getElementById('f-grouplabel').addEventListener('input', e => {
+    // update help text inline
+    const help = e.target.parentElement.querySelector('.help');
+    help.textContent = `Each group is labelled "${e.target.value || 'Group'} 01", "${e.target.value || 'Group'} 02"…`;
+  });
+
+  // Drag-drop
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('photo-input');
+  dropzone.addEventListener('click', e => { if (e.target.tagName !== 'INPUT') fileInput.click(); });
+  ['dragenter','dragover'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add('dragover'); }));
+  ['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove('dragover'); }));
+  dropzone.addEventListener('drop', e => handleFiles(id, e.dataTransfer.files));
+  fileInput.addEventListener('change', e => handleFiles(id, e.target.files));
+
+  renderStudentGrid(id);
+  updateSizesPreview(id);
+}
+
+function updateSizesPreview(id) {
+  const c = DB.classes[id];
+  if (!c) return;
+  const target = parseInt(document.getElementById('f-target').value, 10) || 3;
+  const sizes = calcSizes(c.students.length, target);
+  const sum = sizes.reduce((a, b) => a + b, 0);
+  const preview = document.getElementById('sizes-preview');
+  preview.innerHTML = `<div class="sizes-preview">
+    ${sizes.length === 0 ? '<span class="size-chip">add students to see groups</span>' : sizes.map(s => `<span class="size-chip">${s}</span>`).join('')}
+  </div>
+  ${sizes.length > 0 ? `<div class="help">${sizes.length} group${sizes.length === 1 ? '' : 's'} · ${sum} students total</div>` : ''}`;
+}
+
+function renderStudentGrid(id) {
+  const c = DB.classes[id];
+  const grid = document.getElementById('student-grid');
+  if (!grid) return;
+  const count = c.students.length;
+  document.getElementById('student-count').textContent = count > 0 ? `(${count})` : '';
+  document.getElementById('student-count2').textContent = count > 0 ? `${count} student${count === 1 ? '' : 's'}` : '';
+  grid.innerHTML = c.students.map((s, i) => `<div class="student-tile">
+    <img src="${esc(s.photo)}" alt="">
+    <input type="text" class="name" value="${esc(s.name)}" data-idx="${i}" placeholder="Name">
+    <button class="del" data-idx="${i}" title="Remove">✕</button>
+  </div>`).join('');
+  grid.querySelectorAll('input.name').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const idx = parseInt(e.target.dataset.idx, 10);
+      DB.classes[id].students[idx].name = e.target.value;
+    });
+  });
+  grid.querySelectorAll('button.del').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const idx = parseInt(e.target.dataset.idx, 10);
+      DB.classes[id].students.splice(idx, 1);
+      saveDB(DB);
+      renderStudentGrid(id);
+      updateSizesPreview(id);
+    });
+  });
+}
+
+async function handleFiles(id, fileList) {
+  const c = DB.classes[id];
+  const files = [...fileList].filter(f => f.type.startsWith('image/'));
+  if (files.length === 0) { toast('No image files dropped', 'danger'); return; }
+  toast(`Processing ${files.length} photo${files.length === 1 ? '' : 's'}…`);
+  let added = 0;
+  for (const file of files) {
+    try {
+      const photo = await processPhoto(file);
+      c.students.push({ name: deriveName(file.name), photo });
+      added++;
+    } catch (e) {
+      console.error('processPhoto failed:', e);
+    }
+  }
+  saveDB(DB);
+  renderStudentGrid(id);
+  updateSizesPreview(id);
+  toast(`Added ${added} student${added === 1 ? '' : 's'}`);
+}
+
+function sortStudents() {
+  const m = location.hash.match(/^#\/edit\/(.+)$/); if (!m) return;
+  const id = m[1];
+  DB.classes[id].students.sort((a, b) => a.name.localeCompare(b.name));
+  saveDB(DB);
+  renderStudentGrid(id);
+}
+
+function saveClass(id, andRun) {
+  const c = DB.classes[id];
+  if (!c) return;
+  c.name = document.getElementById('f-name').value.trim() || 'Untitled';
+  c.headerTitle = document.getElementById('f-title').value.trim() || 'CASTAWAY CHOICES';
+  c.headerSubtitle = document.getElementById('f-subtitle').value.trim() || 'Desert Island';
+  c.groupLabel = document.getElementById('f-grouplabel').value.trim() || 'Camp';
+  c.targetGroupSize = parseInt(document.getElementById('f-target').value, 10) || 3;
+  c.groupSizes = calcSizes(c.students.length, c.targetGroupSize);
+  if (!saveDB(DB)) return;
+  toast('Saved');
+  if (andRun) {
+    if (c.students.length < 2) { toast('Add at least 2 students to run', 'danger'); return; }
+    navigate('#/run/' + id);
+  } else {
+    navigate('#/');
+  }
+}
+
+async function deleteClass(id) {
+  const c = DB.classes[id];
+  if (!c) return;
+  const ok = await confirmModal('Delete class', `Delete "${c.name}" and all ${c.students.length} student${c.students.length === 1 ? '' : 's'}? This cannot be undone.`, 'Delete');
+  if (!ok) return;
+  delete DB.classes[id];
+  saveDB(DB);
+  toast('Deleted');
+  navigate('#/');
+}
+
+// ============ JSON IMPORT / EXPORT ============
+function exportClass(id) {
+  const c = DB.classes[id];
+  if (!c) return;
+  const blob = new Blob([JSON.stringify(c, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (c.name || 'class').replace(/[^a-z0-9_-]/gi, '_') + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Exported ' + c.name);
+}
+
+function exportAll() {
+  const blob = new Blob([JSON.stringify(DB, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'castaway_classes.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Exported all classes');
+}
+
+function handleJsonImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      let imported = 0;
+      // Either a single class export or full DB export
+      if (data.classes && typeof data.classes === 'object') {
+        for (const c of Object.values(data.classes)) {
+          if (!c.id) c.id = uid();
+          DB.classes[c.id] = normalizeClass(c);
+          imported++;
+        }
+      } else if (data.students && data.name) {
+        if (!data.id) data.id = uid();
+        DB.classes[data.id] = normalizeClass(data);
+        imported = 1;
+      } else {
+        throw new Error('Unknown format');
+      }
+      saveDB(DB);
+      toast(`Imported ${imported} class${imported === 1 ? '' : 'es'}`);
+      route();
+    } catch (err) {
+      toast('Import failed: ' + err.message, 'danger');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function normalizeClass(c) {
+  return {
+    id: c.id,
+    name: c.name || 'Imported',
+    students: Array.isArray(c.students) ? c.students.filter(s => s && s.name && s.photo) : [],
+    targetGroupSize: c.targetGroupSize || 3,
+    groupSizes: Array.isArray(c.groupSizes) ? c.groupSizes : [],
+    headerTitle: c.headerTitle || 'CASTAWAY CHOICES',
+    headerSubtitle: c.headerSubtitle || c.name || 'Desert Island',
+    groupLabel: c.groupLabel || 'Camp',
+    createdAt: c.createdAt || Date.now(),
+  };
+}
+
+// ============ AUDIO (Web Audio API, synthesised — no external files) ============
+let audioCtx = null;
+let masterGain = null;
+let soundEnabled = localStorage.getItem('castaway.audio') !== '0';
+
+function ensureAudio() {
+  if (!audioCtx) {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return null;
+      audioCtx = new Ctx();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = 1;
+      masterGain.connect(audioCtx.destination);
+    } catch (e) { return null; }
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function tone(delay, freq, dur, opts) {
+  if (!soundEnabled) return;
+  const ctx = ensureAudio(); if (!ctx) return;
+  const { type = 'sine', volume = 0.1 } = opts || {};
+  const osc = ctx.createOscillator(); const gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+  gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+  gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + delay + 0.008);
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + dur);
+  osc.connect(gain); gain.connect(masterGain);
+  osc.start(ctx.currentTime + delay);
+  osc.stop(ctx.currentTime + delay + dur + 0.05);
+}
+
+function sweep(delay, startF, endF, dur, opts) {
+  if (!soundEnabled) return;
+  const ctx = ensureAudio(); if (!ctx) return;
+  const { volume = 0.1 } = opts || {};
+  const osc = ctx.createOscillator(); const gain = ctx.createGain(); const filter = ctx.createBiquadFilter();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(startF, ctx.currentTime + delay);
+  osc.frequency.exponentialRampToValueAtTime(endF, ctx.currentTime + delay + dur);
+  filter.type = 'lowpass'; filter.frequency.value = 1500; filter.Q.value = 4;
+  gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+  gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + delay + 0.15);
+  gain.gain.linearRampToValueAtTime(0, ctx.currentTime + delay + dur);
+  osc.connect(filter); filter.connect(gain); gain.connect(masterGain);
+  osc.start(ctx.currentTime + delay);
+  osc.stop(ctx.currentTime + delay + dur + 0.05);
+}
+
+function drone(delay, dur, opts) {
+  if (!soundEnabled) return;
+  const ctx = ensureAudio(); if (!ctx) return;
+  const { freq = 65, volume = 0.04 } = opts || {};
+  const osc = ctx.createOscillator(); const gain = ctx.createGain();
+  const lfo = ctx.createOscillator(); const lfoGain = ctx.createGain();
+  osc.type = 'sawtooth'; osc.frequency.value = freq;
+  lfo.frequency.value = 0.22; lfoGain.gain.value = 5;
+  lfo.connect(lfoGain); lfoGain.connect(osc.frequency);
+  gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+  gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + delay + 0.6);
+  gain.gain.setValueAtTime(volume, ctx.currentTime + delay + dur - 0.6);
+  gain.gain.linearRampToValueAtTime(0, ctx.currentTime + delay + dur);
+  osc.connect(gain); gain.connect(masterGain);
+  osc.start(ctx.currentTime + delay); osc.stop(ctx.currentTime + delay + dur + 0.05);
+  lfo.start(ctx.currentTime + delay); lfo.stop(ctx.currentTime + delay + dur + 0.05);
+}
+
+// Soundscape for the 7-second shuffle sequence
+// === Code stream (background "calculation" lines during shuffle) ===
+function genCodeLine(subjects, groups) {
+  const hex = () => Math.floor(Math.random() * 256).toString(16).toUpperCase().padStart(2, '0');
+  const p2 = n => String(n).padStart(2, '0');
+  const patterns = [
+    () => `log: driftwood collected`,
+    () => `bearing ${p2(Math.floor(Math.random()*360))}° ${['NE','NW','SE','SW'][Math.floor(Math.random()*4)]}`,
+    () => `tide +${(Math.random()*2).toFixed(1)}m rising`,
+    () => `SOS sent · ch.16`,
+    () => `ration check ok`,
+    () => `> shuffle(${subjects})`,
+    () => `> assign(${subjects}→${groups})`,
+    () => `camp[${Math.floor(Math.random()*groups)+1}] ${['open','full','set'][Math.floor(Math.random()*3)]}`,
+    () => `survivor_${p2(Math.floor(Math.random()*subjects))} → camp_${Math.floor(Math.random()*groups)+1}`,
+    () => `Wilson: present`,
+    () => `fire lit · day ${Math.floor(Math.random()*40)+1}`,
+    () => `fresh water +${Math.floor(Math.random()*3)+1}L`,
+    () => `shelter reinforced`,
+    () => `knot: bowline ✓`,
+    () => `coords ${p2(Math.floor(Math.random()*13))}°${p2(Math.floor(Math.random()*60))}'S`,
+    () => `raft buoyancy ${(Math.random()*0.25+0.7).toFixed(2)}`,
+    () => `fish caught ×${Math.floor(Math.random()*5)+1}`,
+    () => `storm passed`,
+    () => `sail trimmed`,
+    () => `coconuts ×${Math.floor(Math.random()*9)+1}`,
+    () => `> next_survivor()`,
+    () => `headcount ${subjects} ok`,
+    () => `morale ${(Math.random()*0.5+0.5).toFixed(2)}`,
+    () => `signal fire: ready`,
+    () => `seed 0x${hex()}${hex()}`,
+    () => `partition[${Math.floor(Math.random()*groups)+1}] ok`,
+  ];
+  return patterns[Math.floor(Math.random() * patterns.length)]();
+}
+
+let codeStreamInterval = null;
+function startCodeStream(subjects, groups) {
+  if (codeStreamInterval) clearInterval(codeStreamInterval);
+  codeStreamInterval = setInterval(() => {
+    document.querySelectorAll('.code-stream').forEach(stream => {
+      const line = document.createElement('div');
+      line.className = 'code-line';
+      line.textContent = genCodeLine(subjects, groups);
+      stream.appendChild(line);
+      while (stream.children.length > 30) stream.firstChild.remove();
+    });
+  }, 110);
+}
+function stopCodeStream() {
+  if (codeStreamInterval) { clearInterval(codeStreamInterval); codeStreamInterval = null; }
+}
+
+// Short "transmission received" SFX for each card reveal
+function revealSound() {
+  if (!soundEnabled || !ensureAudio()) return;
+  // Two-blip "land spotted"
+  tone(0,    700,  0.06, { type: 'triangle', volume: 0.07 });
+  tone(0.08, 1050, 0.06, { type: 'triangle', volume: 0.07 });
+  // Warm chord
+  tone(0.18,  784, 0.28, { type: 'triangle', volume: 0.09 });
+  tone(0.18, 1175, 0.28, { type: 'triangle', volume: 0.05 });
+}
+
+// Bigger "all done" fanfare
+function finaleSound() {
+  if (!soundEnabled || !ensureAudio()) return;
+  tone(0.00, 523, 0.22, { type: 'triangle', volume: 0.09 });
+  tone(0.10, 659, 0.22, { type: 'triangle', volume: 0.09 });
+  tone(0.20, 784, 0.22, { type: 'triangle', volume: 0.09 });
+  tone(0.30, 1047, 0.5, { type: 'triangle', volume: 0.11 });
+  tone(0.30, 659,  0.5, { type: 'triangle', volume: 0.05 });
+}
+
+function waveBed(delay, dur) {
+  if (!soundEnabled) return;
+  const ctx = ensureAudio(); if (!ctx) return;
+  const bufSize = Math.floor(ctx.sampleRate * dur);
+  const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+  const src = ctx.createBufferSource(); src.buffer = buf;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 480; lp.Q.value = 0.6;
+  const g = ctx.createGain();
+  const lfo = ctx.createOscillator(); const lfoGain = ctx.createGain();
+  lfo.frequency.value = 0.28; lfoGain.gain.value = 0.02;
+  g.gain.setValueAtTime(0, ctx.currentTime + delay);
+  g.gain.linearRampToValueAtTime(0.05, ctx.currentTime + delay + 0.8);
+  g.gain.setValueAtTime(0.05, ctx.currentTime + delay + dur - 0.8);
+  g.gain.linearRampToValueAtTime(0, ctx.currentTime + delay + dur);
+  lfo.connect(lfoGain); lfoGain.connect(g.gain);
+  src.connect(lp); lp.connect(g); g.connect(masterGain);
+  src.start(ctx.currentTime + delay); src.stop(ctx.currentTime + delay + dur + 0.05);
+  lfo.start(ctx.currentTime + delay); lfo.stop(ctx.currentTime + delay + dur + 0.05);
+}
+
+function playShuffleSounds() {
+  if (!soundEnabled) return;
+  if (!ensureAudio()) return;
+  // Ocean wave bed for the whole 7s
+  waveBed(0, 7);
+  // Low ocean rumble
+  drone(0, 7, { freq: 46, volume: 0.03 });
+  // Rising "scanning" tones (0 → 1.5s)
+  [262, 330, 392, 440, 523, 587, 659, 784].forEach((f, i) =>
+    tone(i * 0.18, f, 0.12, { type: 'triangle', volume: 0.04 }));
+  // Swell sweep (1.5 → 3s)
+  sweep(1.5, 120, 900, 1.4, { volume: 0.05 });
+  // Sonar pings (2.2 → 5s)
+  for (let t = 2.2; t < 5; t += 0.6) {
+    tone(t, 1200, 0.08, { type: 'sine', volume: 0.035 });
+    tone(t + 0.03, 1800, 0.05, { type: 'sine', volume: 0.02 });
+  }
+  // "Forming camps" warm descend (5 → 5.7s)
+  tone(5.00, 880, 0.20, { type: 'triangle', volume: 0.06 });
+  tone(5.25, 660, 0.20, { type: 'triangle', volume: 0.06 });
+  tone(5.50, 523, 0.26, { type: 'triangle', volume: 0.06 });
+  // Warm steel-drum-ish chime (6 → 6.7s)
+  tone(6.00, 523, 0.40, { type: 'triangle', volume: 0.08 });
+  tone(6.12, 659, 0.40, { type: 'triangle', volume: 0.08 });
+  tone(6.25, 784, 0.50, { type: 'triangle', volume: 0.10 });
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  localStorage.setItem('castaway.audio', soundEnabled ? '1' : '0');
+  updateSoundToggleUI();
+  if (soundEnabled) {
+    // ensure context and play a tiny confirmation blip
+    ensureAudio(); tone(0, 880, 0.08, { type: 'sine', volume: 0.06 });
+  }
+}
+
+function updateSoundToggleUI() {
+  const btn = document.getElementById('sound-toggle');
+  if (!btn) return;
+  btn.classList.toggle('muted', !soundEnabled);
+  btn.innerHTML = soundEnabled ? '🔊 SOUND ON' : '🔇 SOUND OFF';
+}
+
+function renderSoundToggle() {
+  if (document.getElementById('sound-toggle')) return;
+  const btn = document.createElement('button');
+  btn.id = 'sound-toggle';
+  btn.className = 'sound-toggle' + (soundEnabled ? '' : ' muted');
+  btn.title = 'Toggle ocean SFX';
+  btn.onclick = toggleSound;
+  btn.innerHTML = soundEnabled ? '🔊 SOUND ON' : '🔇 SOUND OFF';
+  document.body.appendChild(btn);
+}
+
+// ============ RANDOMIZER (RUNNER) ============
+let currentRunClassId = null;
+let runStudents = [];
+let runSizes = [];
+let runGroupLabel = 'Camp';
+let runGroups = [];
+let runRevealIndex = -1;
+
+function renderRunner(id) {
+  const c = DB.classes[id];
+  if (!c) { toast('Class not found', 'danger'); navigate('#/'); return; }
+  if (c.students.length < 2) { toast('Add at least 2 students to run', 'danger'); navigate('#/edit/' + id); return; }
+
+  currentRunClassId = id;
+  runStudents = c.students;
+  runSizes = calcSizes(c.students.length, c.targetGroupSize);
+  runGroupLabel = c.groupLabel || 'Camp';
+
+  const app = document.getElementById('app');
+  app.innerHTML = `<div class="header"><div class="header-row">
+    <div>
+      <h1 onclick="navigate('#/')">${esc(c.headerTitle)}</h1>
+      <p id="run-subtitle">${esc(c.headerSubtitle)}</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost btn-sm" onclick="navigate('#/edit/${esc(id)}')">✎ Edit</button>
+      <button class="btn btn-ghost btn-sm" onclick="navigate('#/')">← Classes</button>
+    </div>
+  </div></div>
+  <div id="run-stage"></div>`;
+  showLanding();
+}
+
+function showLanding() {
+  const subtitle = document.getElementById('run-subtitle');
+  const c = DB.classes[currentRunClassId];
+  if (subtitle && c) subtitle.textContent = c.headerSubtitle;
+
+  const stage = document.getElementById('run-stage');
+  stage.innerHTML = `<div class="landing"><div class="landing-faces">${
+    runStudents.map((s, i) => `<img class="landing-face" src="${esc(s.photo)}" alt="${esc(s.name)}" style="animation-delay:${i * 0.04}s">`).join('')
+  }</div><button class="start-btn" onclick="startShuffle()">SHUFFLE & STRAND →</button></div>`;
+}
+
+function startShuffle() {
+  document.getElementById('run-subtitle').textContent = 'Scanning the horizon…';
+  const stage = document.getElementById('run-stage');
+
+  const streaks = Array.from({ length: 48 }, (_, i) => `<div class="streak" style="--a:${i * 7.5}deg;--d:${((i * 113) % 140) / 100}s"></div>`).join('');
+  const initialOrbit = shuffle(runStudents).slice(0, 8);
+  const orbitHTML = photos => photos.map((p, i) => `<div class="orbit-photo" style="--start:${i * 45}deg"><img src="${esc(p.photo)}" alt=""></div>`).join('');
+
+  const lat = () => `${pad2(Math.floor(Math.random()*13))}°${pad2(Math.floor(Math.random()*60))}'S`;
+  const lon = () => `${100 + Math.floor(Math.random()*80)}°${pad2(Math.floor(Math.random()*60))}'W`;
+  const day = () => String(800 + Math.floor(Math.random()*60)).padStart(4,'0');
+  const tide = () => `+${(Math.random()*2).toFixed(1)}m`;
+  const wind = () => `${8 + Math.floor(Math.random()*14)}kt ${['N','NE','E','SE','S','SW','W','NW'][Math.floor(Math.random()*8)]}`;
+
+  stage.innerHTML = `<div class="shuffle-area">
+    <div class="warp-canvas">${streaks}</div>
+    <div class="radar"></div><div class="radar r2"></div><div class="radar r3"></div>
+    <div class="coord-readout tl">LAT ${lat()}<br>LON ${lon()}</div>
+    <div class="coord-readout tr">EXPEDITION LOG<br>DAY ${day()}</div>
+    <div class="coord-readout bl">TIDE ${tide()}<br>WIND ${wind()}</div>
+    <div class="coord-readout br">CASTAWAYS  ${pad2(runStudents.length)}<br>CAMPS    ${pad2(runSizes.length)}</div>
+    <div class="code-stream left"></div>
+    <div class="code-stream right"></div>
+    <div class="hub">
+      <div class="hub-disc"></div><div class="compass-needle"></div>
+      <div class="orbit-zone">${orbitHTML(initialOrbit)}</div>
+    </div>
+    <div class="transmission-text" id="ttext">SCANNING</div>
+    <div class="transmission-data">
+      <span>SHUFFLING</span> <span class="v">${runStudents.length}</span> <span>CASTAWAYS</span>
+      <span class="dot"></span>
+      <span>FORMING</span> <span class="v">${runSizes.length}</span> <span>${esc(runGroupLabel.toUpperCase())}S</span>
+    </div>
+  </div>`;
+
+  // Kick off the synthesised soundscape (gated by soundEnabled)
+  playShuffleSounds();
+
+  // Pre-fill code streams so they're not empty at the start, then keep flowing
+  for (let i = 0; i < 22; i++) {
+    document.querySelectorAll('.code-stream').forEach(stream => {
+      const line = document.createElement('div');
+      line.className = 'code-line';
+      line.style.animationDelay = `${i * 0.03}s`;
+      line.textContent = genCodeLine(runStudents.length, runSizes.length);
+      stream.appendChild(line);
+    });
+  }
+  startCodeStream(runStudents.length, runSizes.length);
+
+  const cycleInterval = setInterval(() => {
+    const fresh = shuffle(runStudents).slice(0, 8);
+    document.querySelectorAll('.orbit-photo img').forEach((img, i) => {
+      if (fresh[i]) img.src = fresh[i].photo;
+    });
+    const tl = document.querySelector('.coord-readout.tl');
+    if (tl) tl.innerHTML = `LAT ${lat()}<br>LON ${lon()}`;
+  }, 320);
+
+  // Phase 2 — SPOTTING (1.5s in)
+  setTimeout(() => {
+    const t = document.getElementById('ttext');
+    const sub = document.getElementById('run-subtitle');
+    if (t) t.textContent = 'SPOTTING';
+    if (sub) sub.textContent = 'Spotting survivors…';
+  }, 1500);
+
+  // Phase 3 — FORMING CAMPS (5s in)
+  setTimeout(() => {
+    const t = document.getElementById('ttext');
+    const sub = document.getElementById('run-subtitle');
+    if (t) t.textContent = 'FORMING CAMPS';
+    if (sub) sub.textContent = 'Forming camps…';
+  }, 5000);
+
+  // Phase 4 — transition to reveal (7s in)
+  setTimeout(() => {
+    clearInterval(cycleInterval);
+    stopCodeStream();
+    runGroups = assignGroups(runStudents, runSizes);
+    runRevealIndex = -1;
+    showReveal();
+  }, 7000);
+}
+
+function showReveal() {
+  document.getElementById('run-subtitle').textContent = 'Tap to reveal a camp…';
+  renderReveal();
+}
+
+function revealNext() {
+  if (runRevealIndex < runGroups.length - 1) {
+    runRevealIndex++;
+    const isLast = runRevealIndex >= runGroups.length - 1;
+    if (isLast) { revealSound(); setTimeout(finaleSound, 500); }
+    else revealSound();
+    renderReveal();
+    if (isLast) {
+      setTimeout(() => document.getElementById('run-subtitle').textContent = 'Camps formed. Pack your bags.', 800);
+    }
+  }
+}
+
+function renderReveal() {
+  const stage = document.getElementById('run-stage');
+  const cardCount = runGroups.length;
+  const cols = Math.min(3, Math.max(1, Math.ceil(Math.sqrt(cardCount))));
+  const orphan = (cardCount % cols !== 0) && (cardCount > cols);
+  const orphanCol = Math.floor((cols - (cardCount % cols)) / 2) + 1;
+  const orphanStyle = orphan ? `<style>.reveal-grid .group-card:nth-child(${cardCount}){grid-column:${orphanCol}}</style>` : '';
+
+  const cards = runGroups.map((g, i) => {
+    const rev = i <= runRevealIndex, isNext = i === runRevealIndex + 1;
+    const label = `${runGroupLabel} ${pad2(g.idx)}`;
+    if (rev) {
+      const members = g.members.map((m, j) => `<div class="member-row"><img class="member-photo" src="${esc(m.photo)}" style="animation-delay:${j * .15}s"><span class="member-name">${esc(m.name)}</span></div>`).join('');
+      const justRevealed = (i === runRevealIndex);
+      const burst = justRevealed ? `<div class="reveal-pulse"></div><div class="reveal-sparks">${
+        [0,60,120,180,240,300].map(a => `<span class="spark" style="--a:${a}deg"></span>`).join('')
+      }</div>` : '';
+      return `<div class="group-card revealed">${burst}<span class="group-num">Group ${g.idx}</span><div class="transmission-label">${esc(label)}</div>${members}</div>`;
+    }
+    return `<div class="group-card hidden ${isNext ? 'next' : ''}" onclick="${isNext ? 'revealNext()' : ''}"><div class="hidden-q">?</div><div class="hidden-label">${esc(label)}</div>${isNext ? '<div class="tap-hint">tap to reveal</div>' : ''}</div>`;
+  }).join('');
+
+  const btn = runRevealIndex < runGroups.length - 1
+    ? `<button class="reveal-btn" onclick="revealNext()">Open ${esc(runGroupLabel)} ${pad2(runRevealIndex + 2)} →</button>`
+    : `<div class="all-done"><h2>Camps formed. Pack your bags.</h2><p>Your camps are ready.</p></div>
+       <button class="reveal-btn" onclick="startShuffle()">↻ Reshuffle</button>
+       <button class="reveal-btn secondary" onclick="showLanding()">← Back</button>`;
+
+  stage.innerHTML = `${orphanStyle}<div class="reveal-area"><div class="reveal-grid" style="grid-template-columns:repeat(${cols},1fr)">${cards}</div><div class="btn-row">${btn}</div></div>`;
+}
+
+// ============ INIT ============
+window.addEventListener('hashchange', route);
+window.navigate = navigate;
+window.newClass = newClass;
+window.saveClass = saveClass;
+window.deleteClass = deleteClass;
+window.sortStudents = sortStudents;
+window.exportClass = exportClass;
+window.exportAll = exportAll;
+window.startShuffle = startShuffle;
+window.revealNext = revealNext;
+window.showLanding = showLanding;
+window.toggleSound = toggleSound;
+renderSoundToggle();
+route();
+</script>
+</body>
+</html>
